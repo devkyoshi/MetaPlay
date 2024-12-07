@@ -1,11 +1,15 @@
 package com.metaplay.backend.services;
 
 import com.metaplay.backend.dto.GameRequestDTO;
+import com.metaplay.backend.dto.GameResponseDTO;
 import com.metaplay.backend.models.Game;
 import com.metaplay.backend.repository.GameRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -58,6 +62,56 @@ public class GameService {
         } catch (Exception e) {
             log.error("Error while updating the game: {}", e.getMessage());
            return false;
+        }
+
+    }
+
+    public boolean deleteGame(Long gameId) {
+        try{
+            // Find the game by id
+            Game game = gameRepository.findById(gameId).orElse(null);
+
+            if(game == null) {
+                log.error("Game not found with id: {}", gameId);
+                return false;
+            }
+
+            // Delete the game
+            gameRepository.delete(game);
+            log.info("Game deleted successfully with id: {}", gameId);
+            return true;
+        } catch (Exception e) {
+            log.error("Error while deleting the game: {}", e.getMessage());
+            return false;
+        }
+    }
+
+
+    public List<GameResponseDTO> getAllGames(){
+
+        try{
+            //Find all games
+            List<Game> games = gameRepository.findAll();
+
+            if(games == null){
+                log.error("No games found");
+                return null;
+            }
+            List<GameResponseDTO> gameResponseList = new ArrayList<>();
+
+            for(Game game: games ){
+                GameResponseDTO gameResponseDTO = new GameResponseDTO();
+                gameResponseDTO.setId(game.getId());
+                gameResponseDTO.setTitle(game.getTitle());
+                gameResponseDTO.setCategory(game.getCategory());
+                gameResponseList.add(gameResponseDTO);
+            }
+            log.info("All games fetched successfully");
+            return gameResponseList;
+
+        } catch (Exception e) {
+            log.error("Error while getting all games: {}", e.getMessage());
+            return null;
         }
 
     }
